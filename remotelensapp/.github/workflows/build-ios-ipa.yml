@@ -1,0 +1,44 @@
+name: Build Flutter iOS IPA (Unsigned)
+
+on:
+  push:
+    branches:
+      - hai
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Verify Flutter folder
+        run: |
+          ls -la
+          echo "📂 Current directory: $(pwd)"
+          if [ ! -f "remotelensapp/pubspec.yaml" ]; then
+            echo "❌ ERROR: Không tìm thấy pubspec.yaml"
+            exit 1
+          fi
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.22.0'
+          cache: true
+
+      - name: Install dependencies
+        working-directory: remotelensapp
+        run: flutter pub get
+
+      - name: Build IPA (no codesign)
+        working-directory: remotelensapp
+        run: flutter build ipa --no-codesign
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-ipa
+          path: remotelensapp/build/ios/ipa/*.ipa
