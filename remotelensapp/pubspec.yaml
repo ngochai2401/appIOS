@@ -1,0 +1,62 @@
+name: remotelens_app
+description: "A remote camera monitoring app with WebRTC"
+publish_to: 'none'
+version: 0.1.0
+
+environment:
+  sdk: ^3.9.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # Camera
+  camera: ^0.12.0
+  get: ^4.6.6
+  gal: ^2.3.0
+  chewie: ^1.8.0
+  ffmpeg_kit_flutter_new: ^4.1.0
+  web_socket_channel: ^3.0.3
+  permission_handler: ^11.3.1
+  # File handling
+  open_file: ^3.5.11
+  path_provider: ^2.1.2
+  # Gallery
+  gallery_saver_plus: ^3.0.1
+  flutter_webrtc: ^1.4.1
+  socket_io_client: ^2.0.3
+  video_player: ^2.8.6
+  video_thumbnail: ^0.5.3
+  flutter_launcher_icons: "^0.14.4"
+  connectivity_plus: ^7.0.0
+  internet_connection_checker: ^1.0.0+1
+
+dependency_overrides:
+  flutter_webrtc: ^0.9.48
+    # path: ../flutter_webrtc_patched
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icon/icon.png"
+  min_sdk_android: 21 # android min sdk min:16, default 21
+  web:
+    generate: true
+    image_path: "assets/icon/icon.png"
+    background_color: "#hexcode"
+    theme_color: "#hexcode"
+  windows:
+    generate: true
+    image_path: "assets/icon/icon.png"
+    icon_size: 48 # min:48, max:256, default: 48
+  macos:
+    generate: true
+    image_path: "assets/icon/icon.png"
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
