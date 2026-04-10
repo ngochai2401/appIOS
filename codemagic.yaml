@@ -1,0 +1,9 @@
+workflows:
+  my-app-workflow:
+    name: My App Workflow
+    max_build_duration: 60
+    instance_type: mac_mini_m1
+    scripts:
+      - name: Say Hello
+        script: | 
+          echo "Codemagic has found the file!"
