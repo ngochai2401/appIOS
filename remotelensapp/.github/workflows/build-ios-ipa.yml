@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - hai
+  pull_request:              # ← Thêm tạm để kích hoạt (sẽ xóa sau)
   workflow_dispatch:
 
 jobs:
@@ -12,26 +13,27 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4          # ← Nâng lên v4
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.19.0'
+          cache: true                      # ← Tăng tốc build
 
       - name: Flutter pub get
         run: flutter pub get
 
       - name: Install CocoaPods
-        run: |
-          cd ios
-          pod install
+        working-directory: ios             # ← Cách này sạch và an toàn hơn cd
+        run: pod install
 
       - name: Build IPA
-        run: flutter build ipa --no-codesign
+        run: flutter build ipa --release --no-codesign   # ← Thêm --release
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
           name: ios-ipa
           path: build/ios/ipa/*.ipa
+          retention-days: 7
