@@ -2,27 +2,22 @@ workflows:
   my-app-workflow:
     name: My App Workflow
     max_build_duration: 60
-    instance_type: mac_mini_m1
-    # 1. Cấu hình biến môi trường (nếu cần cho Code Signing)
+    instance_type: mac_mini_m2
     environment:
-      groups:
-        - apple_auth # Tên group chứa các key Apple của bạn
       flutter: stable
       xcode: latest
     scripts:
       - name: Get Flutter packages
         script: |
-          cd remotelensapp # Di chuyển vào thư mục chứa code Flutter của bạn
+          cd remotelensapp
           flutter packages pub get
       - name: Build Flutter IPA
         script: |
           cd remotelensapp
-          # Lệnh build không cần ký code (chỉ để kiểm tra) hoặc có ký code
+          # Thêm lệnh này để đảm bảo thư mục ios sẵn sàng
           flutter build ipa --release --no-codesign
-    # 2. Đây là phần quan trọng để xuất file tải về
     artifacts:
-      - build/ios/ipa/*.ipa
-    # 3. Gửi thông báo khi build xong (tùy chọn)
+      - remotelensapp/build/ios/ipa/*.ipa
     publishing:
       email:
         recipients:
