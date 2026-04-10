@@ -3,7 +3,8 @@ name: Build iOS IPA
 on:
   push:
     branches:
-      - hai   # đúng branch bạn đang dùng
+      - hai
+  workflow_dispatch:
 
 jobs:
   build:
@@ -18,7 +19,7 @@ jobs:
         with:
           flutter-version: '3.19.0'
 
-      - name: Install dependencies
+      - name: Flutter pub get
         run: flutter pub get
 
       - name: Install CocoaPods
@@ -29,7 +30,7 @@ jobs:
       - name: Build IPA
         run: flutter build ipa --no-codesign
 
-      - name: Upload artifact
+      - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
           name: ios-ipa
