@@ -1,37 +1,34 @@
-name: Build iOS IPA
+name: Build iOS IPA (Development)
 
 on:
   push:
-    branches:
-      - hai
-  workflow_dispatch:
+    branches: [ main, hai ]
+  workflow_dispatch:   # Cho phép chạy thủ công
 
 jobs:
   build:
     runs-on: macos-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.0'
+          flutter-version: '3.x'
 
-      - name: Flutter pub get
+      - name: Get dependencies
         run: flutter pub get
 
-      - name: Install CocoaPods
+      - name: Build IPA (Development)
         run: |
-          cd ios
-          pod install
-
-      - name: Build IPA
-        run: flutter build ipa --no-codesign
+          flutter build ipa --release --export-method=development
+        env:
+          FLUTTER_BUILD_NAME: "1.0.0"
+          FLUTTER_BUILD_NUMBER: "1"
 
       - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
-          name: ios-ipa
+          name: app-ios-ipa
           path: build/ios/ipa/*.ipa
