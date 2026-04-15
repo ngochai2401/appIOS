@@ -1,24 +1,12 @@
 workflows:
-  my-app-workflow:
-    name: My App Workflow
-    max_build_duration: 60
-    instance_type: mac_mini_m2
+  ios-release-no-shorebird:
+    name: iOS Release
     environment:
       flutter: stable
       xcode: latest
     scripts:
-      - name: Get Flutter packages
-        script: |
-          cd remotelensapp
-          flutter packages pub get
-      - name: Build Flutter IPA
-        script: |
-          cd remotelensapp
-          # Thêm lệnh này để đảm bảo thư mục ios sẵn sàng
-          flutter build ipa --release --no-codesign
+      - flutter build ios --simulator
+      - mkdir -p build/ios/ipa
+      - zip -r build/ios/ipa/Runner.app.zip build/ios/iphonesimulator/Runner.app
     artifacts:
-      - remotelensapp/build/ios/ipa/*.ipa
-    publishing:
-      email:
-        recipients:
-          - hai24012005@gmail.com
+      - build/ios/ipa/Runner.app.zip
