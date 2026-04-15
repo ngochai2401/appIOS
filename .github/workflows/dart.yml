@@ -20,7 +20,21 @@ jobs:
         working-directory: remotelensapp
         run: flutter pub get
 
-      - name: Build IPA (NO SIGN)
+      - name: Fix signing issue
+        working-directory: remotelensapp
+        run: |
+          sed -i '' 's/DEVELOPMENT_TEAM = .*/DEVELOPMENT_TEAM = "";/g' ios/Runner.xcodeproj/project.pbxproj
+          sed -i '' 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' ios/Runner.xcodeproj/project.pbxproj
+
+      - name: Install CocoaPods
+        run: |
+          sudo gem install cocoapods
+          cd remotelensapp/ios
+          pod deintegrate || true
+          rm -rf Pods Podfile.lock
+          pod install --repo-update
+
+      - name: Build IPA
         working-directory: remotelensapp
         run: flutter build ipa --release --no-codesign
 
