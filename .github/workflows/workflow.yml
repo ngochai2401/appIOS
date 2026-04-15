@@ -1,13 +1,19 @@
-name: Build iOS IPA (Development)
+name: Build iOS IPA
 
 on:
   push:
-    branches: [ main, master ]
-  workflow_dispatch:     # Cho phép bạn bấm nút "Run workflow" thủ công
+    branches:
+      - hai
+  pull_request:
+  workflow_dispatch:
 
 jobs:
-  build-ios:
+  build:
     runs-on: macos-latest
+
+    concurrency:
+      group: ${{ github.workflow }}-${{ github.ref }}
+      cancel-in-progress: true
 
     steps:
       - name: Checkout code
@@ -16,20 +22,22 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.x'        # Bạn có thể đổi thành phiên bản Flutter của bạn
+          flutter-version: 'stable'   # hoặc chỉ định '3.29.0' nếu bạn muốn fix version
+          cache: true
 
-      - name: Get dependencies
+      - name: Get Flutter dependencies
         run: flutter pub get
 
-      - name: Build IPA
-        run: |
-          flutter build ipa --release --export-method=development
-        env:
-          FLUTTER_BUILD_NAME: "1.0.0"
-          FLUTTER_BUILD_NUMBER: "1"
+      - name: Install CocoaPods
+        working-directory: ios
+        run: pod install
+
+      - name: Build IPA (no codesign)
+        run: flutter build ipa --release --no-codesign
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Remotelens-IPA
+          name: remotelensapp-ios-ipa
           path: build/ios/ipa/*.ipa
+          retention-days: 7
