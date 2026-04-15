@@ -30,21 +30,25 @@ jobs:
         working-directory: remotelensapp
         run: flutter pub get
 
-      - name: Build Flutter iOS engine (no codesign)
+      # Build Flutter engine trước (không archive)
+      - name: Build iOS engine
         working-directory: remotelensapp
         run: flutter build ios --release --no-codesign
 
-      - name: Clean & Install CocoaPods
+      # Pod install
+      - name: Install CocoaPods
         working-directory: remotelensapp/ios
         run: |
           pod deintegrate || true
           rm -rf Pods Podfile.lock
           pod install --repo-update
 
-      - name: Archive with xcodebuild (force no codesign)
+      # Archive bằng xcodebuild (buộc tắt signing)
+      - name: Archive with xcodebuild
         working-directory: remotelensapp/ios
         run: |
-          xcodebuild -workspace Runner.xcworkspace \
+          xcodebuild archive \
+            -workspace Runner.xcworkspace \
             -scheme Runner \
             -configuration Release \
             -archivePath ../build/ios/archive/Runner.xcarchive \
@@ -56,9 +60,11 @@ jobs:
             DEVELOPMENT_TEAM="" \
             PROVISIONING_PROFILE_SPECIFIER="" \
             CODE_SIGN_STYLE=Manual \
+            COMPILER_INDEX_STORE_ENABLE=NO \
             clean archive
 
-      - name: Export IPA (no codesign)
+      # Export IPA
+      - name: Export IPA
         working-directory: remotelensapp
         run: |
           mkdir -p build/ios/ipa
