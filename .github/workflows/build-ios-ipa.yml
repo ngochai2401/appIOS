@@ -15,37 +15,26 @@ jobs:
       group: ${{ github.workflow }}-${{ github.ref }}
       cancel-in-progress: true
 
+    defaults:
+      run:
+        working-directory: remotelensapp   # ← Quan trọng nhất
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.29.0'     # ← Chỉ định rõ version (ổn định nhất)
-          # flutter-version: 'stable'   # Có thể thử lại sau, nhưng hiện đang lỗi
+          flutter-version: '3.29.0'
           cache: true
-          architecture: arm64           # Rõ ràng cho macOS Apple Silicon
-
-      # Kiểm tra thư mục để debug lỗi project root (nếu còn)
-      - name: Check project root
-        run: |
-          pwd
-          ls -la
-          if [ ! -f "pubspec.yaml" ]; then
-            echo "❌ Không tìm thấy pubspec.yaml ở thư mục gốc!"
-            ls -R | head -n 20
-            exit 1
-          fi
-          echo "✅ Đang ở đúng thư mục project"
+          architecture: arm64
 
       - name: Get Flutter dependencies
         run: flutter pub get
 
       - name: Install CocoaPods
-        working-directory: ios
+        working-directory: remotelensapp/ios     # ← Ghi rõ đường dẫn đầy đủ
         run: pod install
 
       - name: Build IPA
@@ -55,5 +44,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: remotelensapp-ios-ipa
-          path: build/ios/ipa/*.ipa
+          path: remotelensapp/build/ios/ipa/*.ipa   # ← Thêm remotelensapp/
           retention-days: 7
