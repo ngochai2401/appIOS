@@ -26,12 +26,10 @@ jobs:
           cache: true
           architecture: arm64
 
-      # Chạy flutter pub get ở thư mục gốc project
       - name: Get Flutter dependencies
         working-directory: remotelensapp
         run: flutter pub get
 
-      # Clean & Install CocoaPods
       - name: Clean old CocoaPods
         working-directory: remotelensapp/ios
         run: |
@@ -42,7 +40,6 @@ jobs:
         working-directory: remotelensapp/ios
         run: pod install --repo-update
 
-      # Build IPA ở thư mục project
       - name: Build IPA (no codesign)
         working-directory: remotelensapp
         run: flutter build ipa --release --no-codesign
