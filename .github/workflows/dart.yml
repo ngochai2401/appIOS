@@ -1,0 +1,31 @@
+name: Build iOS IPA
+
+on:
+  push:
+    branches:
+      - hai
+
+jobs:
+  build:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.6'
+
+      - name: Get dependencies
+        working-directory: remotelensapp
+        run: flutter pub get
+
+      - name: Build IPA (NO SIGN)
+        working-directory: remotelensapp
+        run: flutter build ipa --release --no-codesign
+
+      - name: Upload IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-ipa
+          path: remotelensapp/build/ios/ipa/*.ipa
