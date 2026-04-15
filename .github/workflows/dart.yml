@@ -1,47 +1,34 @@
-name: iOS-ipa-build
+name: Build iOS IPA (No Sign)
 
 on:
   workflow_dispatch:
 
 jobs:
-  build-ios:
-    name: 🎉 iOS Build
+  build:
     runs-on: macos-latest
 
     steps:
       - uses: actions/checkout@v3
 
       - uses: subosito/flutter-action@v2
-        with:
-          channel: 'stable'
 
-      - name: 📦 Get dependencies
+      - name: 📦 Flutter pub get
         run: flutter pub get
         working-directory: remotelensapp
 
-      - name: 🍎 Update CocoaPods
-        run: pod repo update
-        working-directory: remotelensapp/ios
-
-      - name: 🛠 Build iOS
-        run: flutter build ios --release --no-codesign
+      - name: 🛠 Build iOS Simulator
+        run: flutter build ios --release --simulator
         working-directory: remotelensapp
 
-      - name: 📦 Create IPA structure
+      - name: 📦 Create IPA
         run: |
           mkdir Payload
-          mv Runner.app Payload/
-        working-directory: remotelensapp/build/ios/iphoneos
+          cp -r build/ios/iphonesimulator/Runner.app Payload/
+          zip -r app.ipa Payload
+        working-directory: remotelensapp
 
-      - name: 📦 Zip IPA
-        run: zip -qq -r -9 FlutterIpaExport.ipa Payload
-        working-directory: remotelensapp/build/ios/iphoneos
-
-      - name: 🚀 Upload IPA
-        uses: svenstaro/upload-release-action@v2
+      - name: 📤 Upload IPA
+        uses: actions/upload-artifact@v4
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: remotelensapp/build/ios/iphoneos/FlutterIpaExport.ipa
-          tag: v1.0
-          overwrite: true
-          body: "This is first release"
+          name: ios-ipa
+          path: remotelensapp/app.ipa
