@@ -4,78 +4,28 @@ on:
   push:
     branches:
       - hai
-  pull_request:
-  workflow_dispatch:
 
 jobs:
   build:
     runs-on: macos-latest
 
-    concurrency:
-      group: ${{ github.workflow }}-${{ github.ref }}
-      cancel-in-progress: true
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+      - uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.41.6'
-          cache: true
-          architecture: arm64
 
-      - name: Get Flutter dependencies
+      - name: Install dependencies
         working-directory: remotelensapp
         run: flutter pub get
 
-      # Build Flutter engine trước (không archive)
-      - name: Build iOS engine
+      - name: Build IPA
         working-directory: remotelensapp
-        run: flutter build ios --release --no-codesign
+        run: flutter build ipa --release --no-codesign
 
-      # Pod install
-      - name: Install CocoaPods
-        working-directory: remotelensapp/ios
-        run: |
-          pod deintegrate || true
-          rm -rf Pods Podfile.lock
-          pod install --repo-update
-
-      # Archive bằng xcodebuild (buộc tắt signing)
-      - name: Archive with xcodebuild
-        working-directory: remotelensapp/ios
-        run: |
-          xcodebuild archive \
-            -workspace Runner.xcworkspace \
-            -scheme Runner \
-            -configuration Release \
-            -archivePath ../build/ios/archive/Runner.xcarchive \
-            -sdk iphoneos \
-            -destination 'generic/platform=iOS' \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY="" \
-            DEVELOPMENT_TEAM="" \
-            PROVISIONING_PROFILE_SPECIFIER="" \
-            CODE_SIGN_STYLE=Manual \
-            COMPILER_INDEX_STORE_ENABLE=NO \
-            clean archive
-
-      # Export IPA
-      - name: Export IPA
-        working-directory: remotelensapp
-        run: |
-          mkdir -p build/ios/ipa
-          xcodebuild -exportArchive \
-            -archivePath build/ios/archive/Runner.xcarchive \
-            -exportOptionsPlist ios/ExportOptions.plist \
-            -exportPath build/ios/ipa
-
-      - name: Upload IPA artifact
+      - name: Upload IPA
         uses: actions/upload-artifact@v4
         with:
-          name: remotelensapp-ios-ipa
+          name: ios-ipa
           path: remotelensapp/build/ios/ipa/*.ipa
-          retention-days: 7
