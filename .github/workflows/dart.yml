@@ -16,8 +16,8 @@ jobs:
         run: flutter pub get
         working-directory: remotelensapp
 
-      - name: 🛠 Build iOS Simulator
-        run: flutter build ios --release --simulator
+      - name: 🛠 Build iOS Simulator (DEBUG)
+        run: flutter build ios --debug --simulator
         working-directory: remotelensapp
 
       - name: 📦 Create IPA
