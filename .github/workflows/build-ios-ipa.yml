@@ -26,23 +26,26 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.41.6'      # ← Đã cập nhật lên version mới nhất
+          flutter-version: '3.41.6'
           cache: true
           architecture: arm64
 
-      - name: Get Flutter dependencies
+      - name: Get dependencies
         run: flutter pub get
 
-      - name: Install CocoaPods
-        working-directory: remotelensapp/ios
-        run: pod install
+      - name: Clean & Install CocoaPods
+        working-directory: ios
+        run: |
+          pod deintegrate || true
+          rm -rf Pods Podfile.lock
+          pod install --repo-update
 
-      - name: Build IPA
+      - name: Build IPA (no codesign)
         run: flutter build ipa --release --no-codesign
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
         with:
           name: remotelensapp-ios-ipa
-          path: remotelensapp/build/ios/ipa/*.ipa
+          path: build/ios/ipa/*.ipa
           retention-days: 7
