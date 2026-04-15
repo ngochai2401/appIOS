@@ -18,13 +18,27 @@ jobs:
         working-directory: remotelensapp
         run: flutter pub get
 
-      - name: 🔧 Remove signing
+      - name: 🔧 Remove signing (pbxproj)
         working-directory: remotelensapp
         run: |
           sed -i '' 's/DEVELOPMENT_TEAM = .*/DEVELOPMENT_TEAM = "";/g' ios/Runner.xcodeproj/project.pbxproj
           sed -i '' 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' ios/Runner.xcodeproj/project.pbxproj
           sed -i '' 's/CODE_SIGNING_REQUIRED = YES;/CODE_SIGNING_REQUIRED = NO;/g' ios/Runner.xcodeproj/project.pbxproj
           sed -i '' 's/CODE_SIGNING_ALLOWED = YES;/CODE_SIGNING_ALLOWED = NO;/g' ios/Runner.xcodeproj/project.pbxproj
+
+      - name: 🔧 Remove signing (xcconfig)
+        working-directory: remotelensapp
+        run: |
+          sed -i '' '/DEVELOPMENT_TEAM/d' ios/Flutter/*.xcconfig
+          sed -i '' '/CODE_SIGN_STYLE/d' ios/Flutter/*.xcconfig
+          sed -i '' '/CODE_SIGN_IDENTITY/d' ios/Flutter/*.xcconfig
+
+      - name: 🚫 Force disable signing
+        run: |
+          echo "CODE_SIGNING_ALLOWED=NO" >> $GITHUB_ENV
+          echo "CODE_SIGNING_REQUIRED=NO" >> $GITHUB_ENV
+          echo "CODE_SIGN_IDENTITY=" >> $GITHUB_ENV
+          echo "DEVELOPMENT_TEAM=" >> $GITHUB_ENV
 
       - name: 📦 Build IPA
         working-directory: remotelensapp
