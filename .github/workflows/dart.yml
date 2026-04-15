@@ -11,24 +11,25 @@ jobs:
       - uses: actions/checkout@v3
 
       - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.6'
 
       - name: 📦 Flutter pub get
+        working-directory: remotelensapp
         run: flutter pub get
-        working-directory: remotelensapp
 
-      - name: 🛠 Build iOS Simulator (DEBUG)
-        run: flutter build ios --debug --simulator
+      - name: 🔧 Fix signing (IMPORTANT)
         working-directory: remotelensapp
-
-      - name: 📦 Create IPA
         run: |
-          mkdir Payload
-          cp -r build/ios/iphonesimulator/Runner.app Payload/
-          zip -r app.ipa Payload
+          sed -i '' 's/DEVELOPMENT_TEAM = .*/DEVELOPMENT_TEAM = "";/g' ios/Runner.xcodeproj/project.pbxproj
+          sed -i '' 's/CODE_SIGN_STYLE = Automatic;/CODE_SIGN_STYLE = Manual;/g' ios/Runner.xcodeproj/project.pbxproj
+
+      - name: 📦 Build IPA
         working-directory: remotelensapp
+        run: flutter build ipa --release --no-codesign
 
       - name: 📤 Upload IPA
         uses: actions/upload-artifact@v4
         with:
           name: ios-ipa
-          path: remotelensapp/app.ipa
+          path: remotelensapp/build/ios/ipa/*.ipa
