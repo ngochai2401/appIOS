@@ -19,26 +19,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0   # Đôi khi giúp ổn định hơn
+          fetch-depth: 0
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: 'stable'
+          flutter-version: '3.29.0'     # ← Chỉ định rõ version (ổn định nhất)
+          # flutter-version: 'stable'   # Có thể thử lại sau, nhưng hiện đang lỗi
           cache: true
+          architecture: arm64           # Rõ ràng cho macOS Apple Silicon
 
-      # Bước quan trọng: Đảm bảo đang ở đúng thư mục gốc
-      - name: Check current directory and files
+      # Kiểm tra thư mục để debug lỗi project root (nếu còn)
+      - name: Check project root
         run: |
           pwd
           ls -la
           if [ ! -f "pubspec.yaml" ]; then
             echo "❌ Không tìm thấy pubspec.yaml ở thư mục gốc!"
-            echo "Danh sách thư mục:"
-            ls -R | head -n 30
+            ls -R | head -n 20
             exit 1
           fi
-          echo "✅ pubspec.yaml tồn tại → OK"
+          echo "✅ Đang ở đúng thư mục project"
 
       - name: Get Flutter dependencies
         run: flutter pub get
