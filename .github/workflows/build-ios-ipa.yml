@@ -17,7 +17,7 @@ jobs:
 
     defaults:
       run:
-        working-directory: remotelensapp
+        working-directory: remotelensapp   # Project Flutter nằm ở đây
 
     steps:
       - name: Checkout code
@@ -30,15 +30,18 @@ jobs:
           cache: true
           architecture: arm64
 
-      - name: Get dependencies
+      - name: Get Flutter dependencies
         run: flutter pub get
 
-      - name: Clean & Install CocoaPods
-        working-directory: ios
+      - name: Clean old CocoaPods
+        working-directory: ios          # ← Chỉ ghi "ios" (vì defaults đã là remotelensapp)
         run: |
           pod deintegrate || true
           rm -rf Pods Podfile.lock
-          pod install --repo-update
+
+      - name: Install CocoaPods
+        working-directory: ios
+        run: pod install --repo-update
 
       - name: Build IPA (no codesign)
         run: flutter build ipa --release --no-codesign
@@ -47,5 +50,5 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: remotelensapp-ios-ipa
-          path: build/ios/ipa/*.ipa
+          path: build/ios/ipa/*.ipa     # Không cần thêm remotelensapp/ vì defaults đã áp dụng
           retention-days: 7
