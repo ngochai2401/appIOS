@@ -30,19 +30,42 @@ jobs:
         working-directory: remotelensapp
         run: flutter pub get
 
-      - name: Clean old CocoaPods
+      - name: Build Flutter iOS engine (no codesign)
+        working-directory: remotelensapp
+        run: flutter build ios --release --no-codesign
+
+      - name: Clean & Install CocoaPods
         working-directory: remotelensapp/ios
         run: |
           pod deintegrate || true
           rm -rf Pods Podfile.lock
+          pod install --repo-update
 
-      - name: Install CocoaPods
+      - name: Archive with xcodebuild (force no codesign)
         working-directory: remotelensapp/ios
-        run: pod install --repo-update
+        run: |
+          xcodebuild -workspace Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -archivePath ../build/ios/archive/Runner.xcarchive \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            DEVELOPMENT_TEAM="" \
+            PROVISIONING_PROFILE_SPECIFIER="" \
+            CODE_SIGN_STYLE=Manual \
+            clean archive
 
-      - name: Build IPA (no codesign)
+      - name: Export IPA (no codesign)
         working-directory: remotelensapp
-        run: flutter build ipa --release --no-codesign
+        run: |
+          mkdir -p build/ios/ipa
+          xcodebuild -exportArchive \
+            -archivePath build/ios/archive/Runner.xcarchive \
+            -exportOptionsPlist ios/ExportOptions.plist \
+            -exportPath build/ios/ipa
 
       - name: Upload IPA artifact
         uses: actions/upload-artifact@v4
